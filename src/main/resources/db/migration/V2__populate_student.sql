@@ -1,0 +1,1 @@
+INSERT INTO student (address, course, full_name, phone_number) VALUES ('Odesa', 'JAVA', 'name', '1111111');
