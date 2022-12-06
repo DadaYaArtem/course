@@ -7,7 +7,7 @@ import java.util.UUID;
 
 @MappedSuperclass
 @Data
-public abstract class User {
+public abstract class AbstractUser {
     @Id
     @GeneratedValue
     private UUID id;
@@ -23,10 +23,10 @@ public abstract class User {
     @Enumerated(EnumType.STRING)
     private Course course;
 
-    public User() {
+    public AbstractUser() {
     }
 
-    public User(String fullName, String address, String phoneNumber, Course course) {
+    public AbstractUser(String fullName, String address, String phoneNumber, Course course) {
         this.fullName = fullName;
         this.address = address;
         this.phoneNumber = phoneNumber;

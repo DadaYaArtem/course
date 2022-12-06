@@ -1,10 +1,12 @@
-package oop.term;
+package oop.term.repository;
 
 import oop.term.model.Student;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-public interface StudentRepository extends JpaRepository<Student, Long> {
+import java.util.UUID;
+
+public interface StudentRepository extends JpaRepository<Student, UUID> {
     @Query(nativeQuery = true, value = "SELECT * FROM student WHERE address = ?1")
-    Student findByAddress(String email);
+    Student findByAddress(String address);
 }
