@@ -3,8 +3,10 @@ package oop.term.controller;
 import lombok.RequiredArgsConstructor;
 import oop.term.repository.StudentRepository;
 import oop.term.model.Student;
+import org.springframework.boot.Banner;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
@@ -23,8 +25,8 @@ public class MainController {
         return modelAndView;
     }
 
-    @GetMapping(value = "/students-list")
-    public ModelAndView showStudentsList() throws IOException {
+    @GetMapping(value = "/students")
+    public ModelAndView showStudentsList(){
         ModelAndView modelAndView = new ModelAndView("students-list");
         List<Student> stList = studentRepository.findAll();
         for (Student student : stList) {
@@ -32,6 +34,16 @@ public class MainController {
         }
 
         modelAndView.addObject("stList", stList);
+        return modelAndView;
+    }
+
+    @GetMapping(value = "students/grade")
+    public ModelAndView showStudentGrade(@RequestParam(name = "id") Integer id){
+        ModelAndView modelAndView = new ModelAndView("student-grade");
+        Student byId = studentRepository.getReferenceById(id);
+        System.out.println("id = " + id);
+        System.out.println("byId = " + byId);
+        modelAndView.addObject("grades", byId.getGradeList());
         return modelAndView;
     }
 }

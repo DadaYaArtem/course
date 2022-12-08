@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="../index.css"/>
+</head>
+<body>
+<h1 th:text="'List of student grades: ' + ${grades.size()} + ' grades'" class='text'></h1>
+
+<div th:each="g: ${grades}" class='inline'>
+  <div th:text="'Subject: ' + ${g.subject}" class='inline'></div>
+  <div th:text="'Grade: ' + ${g.grade}" class='inline'></div>
+</div>
+</body>
+</html>

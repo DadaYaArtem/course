@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.UUID;
 
-public interface StudentRepository extends JpaRepository<Student, UUID> {
+public interface StudentRepository extends JpaRepository<Student, Integer> {
     @Query(nativeQuery = true, value = "SELECT * FROM student WHERE address = ?1")
     Student findByAddress(String address);
 }
