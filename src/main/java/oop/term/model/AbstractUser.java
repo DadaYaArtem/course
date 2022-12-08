@@ -9,8 +9,8 @@ import java.util.UUID;
 @Data
 public abstract class AbstractUser {
     @Id
-    @GeneratedValue
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
     @Column(name = "full_name")
     private String fullName;
@@ -33,11 +33,11 @@ public abstract class AbstractUser {
         this.course = course;
     }
 
-    public UUID getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

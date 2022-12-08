@@ -24,4 +24,12 @@ public class Student extends AbstractUser {
         super(fullName, address, phoneNumber, course);
         this.gradeList = gradeList;
     }
+
+    public List<Grade> getGradeList() {
+        return gradeList;
+    }
+
+    public void setGradeList(List<Grade> gradeList) {
+        this.gradeList = gradeList;
+    }
 }

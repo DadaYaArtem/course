@@ -11,15 +11,11 @@ import java.util.UUID;
 public class Grade {
     @Id
     @Column(name = "id")
-    @GeneratedValue
-    private UUID studentId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer studentId;
     @Enumerated(EnumType.STRING)
     private Subject subject;
     private int grade; // 0-bad, 90-ok, but can be better, 100- excellent
-
-    @ManyToOne
-    private Student students;
-
 
     public Grade() {
     }
@@ -29,11 +25,11 @@ public class Grade {
         this.grade = grade;
     }
 
-    public UUID getStudentId() {
+    public Integer getStudentId() {
         return studentId;
     }
 
-    public void setStudentId(UUID studentId) {
+    public void setStudentId(Integer studentId) {
         this.studentId = studentId;
     }
 

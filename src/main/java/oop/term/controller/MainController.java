@@ -28,7 +28,7 @@ public class MainController {
         ModelAndView modelAndView = new ModelAndView("students-list");
         List<Student> stList = studentRepository.findAll();
         for (Student student : stList) {
-            System.out.println(student);
+            System.out.println(student.getGradeList());
         }
 
         modelAndView.addObject("stList", stList);
