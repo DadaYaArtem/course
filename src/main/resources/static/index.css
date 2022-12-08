@@ -17,6 +17,36 @@
     display: inline-block;
 }
 
+.exc {
+    font-size: larger;
+    font: italic small-caps bold 16px/2 cursive;
+    border:2px solid red;
+    font-weight: lighter;
+    background-color:green;
+    padding:7px;
+    margin:7px;
+    border-radius:7px;
+    opacity:0.9;
+    box-shadow: 10px 10px 10px#2F3841;
+    text-align:center;
+    display: inline-block;
+}
+
+.bad {
+    font-size: larger;
+    font: italic small-caps bold 16px/2 cursive;
+    border:2px solid red;
+    font-weight: lighter;
+    background-color:red;
+    padding:7px;
+    margin:7px;
+    border-radius:7px;
+    opacity:0.9;
+    box-shadow: 10px 10px 10px#2F3841;
+    text-align:center;
+    display: inline-block;
+}
+
 .text {
     padding:7px;
     margin:7px;

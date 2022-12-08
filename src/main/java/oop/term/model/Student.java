@@ -1,11 +1,9 @@
 package oop.term.model;
 
 import lombok.EqualsAndHashCode;
+import oop.term.StudentService;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.util.List;
 
 
@@ -17,12 +15,16 @@ public class Student extends AbstractUser {
     @JoinColumn(name = "students_id")
     private List<Grade> gradeList;
 
+    @Transient
+    private int avgGrade;
+
     public Student() {
     }
 
     public Student(String fullName, String address, String phoneNumber, Course course, List<Grade> gradeList) {
         super(fullName, address, phoneNumber, course);
         this.gradeList = gradeList;
+        this.avgGrade = StudentService.getAvgGrade(gradeList);
     }
 
     public List<Grade> getGradeList() {
@@ -31,5 +33,13 @@ public class Student extends AbstractUser {
 
     public void setGradeList(List<Grade> gradeList) {
         this.gradeList = gradeList;
+    }
+
+    public int getAvgGrade() {
+        return avgGrade;
+    }
+
+    public void setAvgGrade(int avgGrade) {
+        this.avgGrade = avgGrade;
     }
 }

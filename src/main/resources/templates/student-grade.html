@@ -7,6 +7,7 @@
 </head>
 <body>
 <h1 th:text="'List of student grades: ' + ${grades.size()} + ' grades'" class='text'></h1>
+<h1 th:text="'Avarage grade: ' + ${avg}" class='text'></h1>
 
 <div th:each="g: ${grades}" class='inline'>
   <div th:text="'Subject: ' + ${g.subject}" class='inline'></div>

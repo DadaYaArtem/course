@@ -1,6 +1,8 @@
 package oop.term.controller;
 
 import lombok.RequiredArgsConstructor;
+import oop.term.StudentService;
+import oop.term.model.Grade;
 import oop.term.repository.StudentRepository;
 import oop.term.model.Student;
 import org.springframework.boot.Banner;
@@ -29,9 +31,9 @@ public class MainController {
     public ModelAndView showStudentsList(){
         ModelAndView modelAndView = new ModelAndView("students-list");
         List<Student> stList = studentRepository.findAll();
-        for (Student student : stList) {
-            System.out.println(student.getGradeList());
-        }
+
+        modelAndView.addObject("exSt", StudentService.getExcStudents(stList));
+        modelAndView.addObject("bdSt", StudentService.getBadStudents(stList));
 
         modelAndView.addObject("stList", stList);
         return modelAndView;
@@ -41,9 +43,15 @@ public class MainController {
     public ModelAndView showStudentGrade(@RequestParam(name = "id") Integer id){
         ModelAndView modelAndView = new ModelAndView("student-grade");
         Student byId = studentRepository.getReferenceById(id);
+        List<Grade> gradeList = byId.getGradeList();
+        int avgGrade = StudentService.getAvgGrade(gradeList);
+
+        System.out.println("avgGrade = " + avgGrade);
         System.out.println("id = " + id);
         System.out.println("byId = " + byId);
-        modelAndView.addObject("grades", byId.getGradeList());
+
+        modelAndView.addObject("grades", gradeList);
+        modelAndView.addObject("avg", avgGrade);
         return modelAndView;
     }
 }

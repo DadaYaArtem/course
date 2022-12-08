@@ -8,8 +8,10 @@
 <body>
 
 <h1 th:text="'List of all students: ' + ${stList.size()} + ' students'" class='text'></h1>
+<h1 th:text="'Excellent student (avg grade > 90): ' + ${exSt} + ' students'" class='text'></h1>
+<h1 th:text="'Bad student (avg grade < 60): ' + ${bdSt} + ' students'" class='text'></h1>
 
-<div th:each="l: ${stList}" class='inline'>
+<div th:each="l: ${stList}" th:class="${l.getAvgGrade() < 60} ? 'bad' : (${l.getAvgGrade() >= 90} ? 'exc' : 'inline')">
     <div th:text="'Id: ' + ${l.id}" class='inline'></div>
     <div th:text="'Name: ' + ${l.fullName}" class='inline'></div>
     <div th:text="'Address: ' + ${l.address}" class='inline'></div>
