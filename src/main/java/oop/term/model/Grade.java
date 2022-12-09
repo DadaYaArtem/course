@@ -33,9 +33,5 @@ public class Grade {
         this.studentId = studentId;
     }
 
-    public enum Subject{
-        MATH,
-        PROGRAMMING,
-        ENGLISH
-    }
+
 }

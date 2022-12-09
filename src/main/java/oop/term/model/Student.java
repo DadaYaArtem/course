@@ -1,8 +1,5 @@
 package oop.term.model;
 
-import lombok.EqualsAndHashCode;
-import oop.term.StudentService;
-
 import javax.persistence.*;
 import java.util.List;
 
@@ -24,7 +21,6 @@ public class Student extends AbstractUser {
     public Student(String fullName, String address, String phoneNumber, Course course, List<Grade> gradeList) {
         super(fullName, address, phoneNumber, course);
         this.gradeList = gradeList;
-        this.avgGrade = StudentService.getAvgGrade(gradeList);
     }
 
     public List<Grade> getGradeList() {

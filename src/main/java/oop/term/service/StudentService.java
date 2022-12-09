@@ -1,4 +1,4 @@
-package oop.term;
+package oop.term.service;
 
 import oop.term.model.Grade;
 import oop.term.model.Student;
@@ -38,7 +38,7 @@ public class StudentService {
 
         for (Student student : students) {
             int avgGrade = getAvgGrade(student.getGradeList());
-            if (avgGrade <= 90){
+            if (avgGrade < 60){
                 result++;
             }
         }
