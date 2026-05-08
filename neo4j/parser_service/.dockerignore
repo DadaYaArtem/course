@@ -1,0 +1,9 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.env
+parser/output/
+parser/samples/corpus_pdfs/
+parser/samples/corpus_txt/
+parser/samples/corpus_fragments/
+parser/samples/corpus_fragments_balanced/
