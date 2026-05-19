@@ -1,3 +1,4 @@
+import os
 import re
 import sys
 from pathlib import Path
@@ -40,6 +41,14 @@ class LocalParserPipeline:
         if not parser_dir.exists():
             raise DocumentServiceError(f"Parser service directory not found: {parser_dir}")
 
+        subprocess_env = {
+            **os.environ,
+            "NEO4J_URI": settings.neo4j_uri,
+            "NEO4J_USER": settings.neo4j_user,
+            "NEO4J_PASSWORD": settings.neo4j_password,
+            "NEO4J_DATABASE": settings.neo4j_database,
+        }
+
         process = await asyncio.create_subprocess_exec(
             sys.executable,
             "-m",
@@ -50,6 +59,7 @@ class LocalParserPipeline:
             settings.parser_output_dir,
             "--import-neo4j",
             cwd=parser_dir,
+            env=subprocess_env,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
