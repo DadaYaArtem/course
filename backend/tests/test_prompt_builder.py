@@ -82,7 +82,7 @@ def test_build_none_context_returns_warning_prompt(builder: PromptBuilder) -> No
     )
 
     assert result.warning is True
-    assert "intent is unclear" in result.prompt
+    assert "No Neo4j knowledge-base context was found" in result.prompt
 
 
 def test_build_prompt_helper_uses_default_builder() -> None:
