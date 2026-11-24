@@ -12,7 +12,7 @@ from app.services.query_service import get_query_service
 class FakeQueryService:
     """Query service test double for API tests."""
 
-    async def answer(self, text: str) -> QueryServiceResult:
+    async def answer(self, text: str, language: str = "ru") -> QueryServiceResult:
         """Return a fake query answer."""
         return QueryServiceResult(
             answer=f"Answer for: {text}",
@@ -46,7 +46,7 @@ class FakeDocumentService:
 class FailingQueryService:
     """Query service test double that raises an LLM error."""
 
-    async def answer(self, text: str) -> QueryServiceResult:
+    async def answer(self, text: str, language: str = "ru") -> QueryServiceResult:
         """Raise an LLM error."""
         raise LLMError("LLM is unavailable.")
 

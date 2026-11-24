@@ -40,6 +40,7 @@ def test_query_endpoint_e2e_real_service_real_neo4j_mocked_llm() -> None:
         "query_type": "capabilities",
         "source_entities": ["BERT"],
         "from_kb": True,
+        "classification_source": "rules",
     }
     assert "Question Answering" in llm_client.prompts[0]
 
