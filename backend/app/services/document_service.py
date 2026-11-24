@@ -23,7 +23,7 @@ class ParserPipelineProtocol(Protocol):
 class LocalParserPipeline:
     """Run the local parser pipeline as a subprocess when enabled."""
 
-    async def run(self, input_path: Path) -> tuple[bool, str]:
+    async def run(self, input_path: Path, *, timeout: int | None = None) -> tuple[bool, str]:
         """Run parser CLI for an uploaded document.
 
         Args:
@@ -63,7 +63,17 @@ class LocalParserPipeline:
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
-        stdout, stderr = await process.communicate()
+        communication = asyncio.create_task(process.communicate())
+        try:
+            stdout, stderr = await asyncio.wait_for(asyncio.shield(communication), timeout)
+        except (TimeoutError, asyncio.CancelledError):
+            if process.returncode is None:
+                try:
+                    process.kill()
+                except ProcessLookupError:
+                    pass
+            await communication
+            raise
         if process.returncode != 0:
             detail = stderr.decode("utf-8", errors="replace").strip()
             raise DocumentServiceError(f"Parser pipeline failed: {detail}")
@@ -126,15 +136,20 @@ class DocumentService:
 
     def _save_upload(self, original_name: str, content: bytes) -> Path:
         """Persist uploaded file content to the upload directory."""
-        self._upload_dir.mkdir(parents=True, exist_ok=True)
-        safe_name = self._safe_filename(original_name)
-        saved_path = self._upload_dir / f"{uuid4().hex}_{safe_name}"
-        saved_path.write_bytes(content)
-        return saved_path
+        return save_upload(self._upload_dir, original_name, content)
 
-    def _safe_filename(self, filename: str) -> str:
-        """Return a filesystem-safe filename."""
-        return re.sub(r"[^A-Za-z0-9._-]+", "_", Path(filename).name)
+
+def save_upload(directory: Path, original_name: str, content: bytes) -> Path:
+    """Save a document under a unique, filesystem-safe name."""
+    directory.mkdir(parents=True, exist_ok=True)
+    safe_name = re.sub(r"[^A-Za-z0-9._-]+", "_", Path(original_name).name)
+    saved_path = directory / f"{uuid4().hex}_{safe_name}"
+    try:
+        saved_path.write_bytes(content)
+    except OSError:
+        saved_path.unlink(missing_ok=True)
+        raise
+    return saved_path
 
 
 async def get_document_service(

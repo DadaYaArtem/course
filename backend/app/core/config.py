@@ -1,3 +1,4 @@
+from pydantic import PositiveInt
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -19,6 +20,9 @@ class Settings(BaseSettings):
 
     document_upload_dir: str = "uploads/documents"
     document_parser_enabled: bool = False
+    document_job_timeout_seconds: PositiveInt = 120
+    document_job_max_attempts: PositiveInt = 3
+    document_job_max_bytes: PositiveInt = 25 * 1024 * 1024
     parser_service_dir: str = "../neo4j/parser_service"
     parser_output_dir: str = "parser/output"
 

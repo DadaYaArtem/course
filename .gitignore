@@ -45,3 +45,4 @@ models_cache/
 
 # Handoff archives
 .handoff/
+backend/uploads/
