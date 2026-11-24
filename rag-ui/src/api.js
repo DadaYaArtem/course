@@ -65,11 +65,11 @@ export async function getDocuments() {
   return data;
 }
 
-export async function uploadDocument(file) {
+export async function createDocumentJob(file) {
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await fetch(`${API_BASE_URL}/documents/upload`, {
+  const response = await fetch(`${API_BASE_URL}/document-jobs`, {
     method: "POST",
     body: formData,
   });
@@ -80,5 +80,14 @@ export async function uploadDocument(file) {
     throw buildApiError(response, data);
   }
 
+  return data;
+}
+
+export async function getDocumentJob(id, signal) {
+  const response = await fetch(`${API_BASE_URL}/document-jobs/${id}`, { signal });
+  const data = await parseResponse(response);
+  if (!response.ok) {
+    throw buildApiError(response, data);
+  }
   return data;
 }

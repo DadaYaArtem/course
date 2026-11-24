@@ -1,12 +1,15 @@
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from neo4j.exceptions import DriverError, Neo4jError
 
+from app.core.config import settings
 from app.core.database import close_driver, get_driver
 from app.core.exception_handlers import (
     app_error_handler,
@@ -16,7 +19,7 @@ from app.core.exception_handlers import (
 )
 from app.core.exceptions import AppError
 from app.core.logging import setup_logging
-from app.routers import documents, query
+from app.routers import document_jobs, documents, query
 
 logger = logging.getLogger(__name__)
 
@@ -59,5 +62,20 @@ async def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
+@app.get("/ready", tags=["health"])
+async def readiness() -> dict[str, str]:
+    """Check that the configured Neo4j database accepts read queries."""
+    driver = await get_driver()
+    try:
+        async with asyncio.timeout(3):
+            async with driver.session(database=settings.neo4j_database) as session:
+                result = await session.run("RETURN 1")
+                await result.consume()
+    except (DriverError, Neo4jError, TimeoutError) as exc:
+        raise HTTPException(503, "Neo4j is not ready.") from exc
+    return {"status": "ready"}
+
+
 app.include_router(query.router)
 app.include_router(documents.router)
+app.include_router(document_jobs.router)

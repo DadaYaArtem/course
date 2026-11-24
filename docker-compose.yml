@@ -8,21 +8,34 @@ services:
       - "7687:7687"
     environment:
       NEO4J_AUTH: neo4j/password123
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          wget -qO- --user=neo4j --password=password123 --auth-no-challenge
+          --header='Content-Type: application/json'
+          --post-data='{"statements":[{"statement":"RETURN 1"}]}'
+          http://127.0.0.1:7474/db/neo4j/tx/commit | grep -qF '"errors":[]'
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
     volumes:
       - neo4j_data:/data
       - ./neo4j/cypher:/cypher:ro
 
   backend:
-    build:
+    build: &backend-build
       context: ./backend
       dockerfile: Dockerfile
     container_name: rag-backend
     restart: unless-stopped
-    depends_on:
-      - neo4j
+    depends_on: &backend-dependencies
+      neo4j:
+        condition: service_healthy
     ports:
       - "8000:8000"
-    environment:
+    environment: &backend-environment
       NEO4J_URI: bolt://neo4j:7687
       NEO4J_USER: neo4j
       NEO4J_PASSWORD: password123
@@ -35,11 +48,23 @@ services:
       QUERY_CLASSIFIER_USE_LLM: ${QUERY_CLASSIFIER_USE_LLM:-true}
       DOCUMENT_UPLOAD_DIR: /app/uploads/documents
       DOCUMENT_PARSER_ENABLED: ${DOCUMENT_PARSER_ENABLED:-true}
+      DOCUMENT_JOB_TIMEOUT_SECONDS: ${DOCUMENT_JOB_TIMEOUT_SECONDS:-120}
+      DOCUMENT_JOB_MAX_ATTEMPTS: ${DOCUMENT_JOB_MAX_ATTEMPTS:-3}
+      DOCUMENT_JOB_MAX_BYTES: ${DOCUMENT_JOB_MAX_BYTES:-26214400}
       PARSER_SERVICE_DIR: /parser_service
       PARSER_OUTPUT_DIR: parser/output
-    volumes:
+    volumes: &backend-volumes
       - backend_uploads:/app/uploads
       - ./neo4j/parser_service:/parser_service
+
+  document-worker:
+    build: *backend-build
+    init: true
+    restart: on-failure
+    depends_on: *backend-dependencies
+    environment: *backend-environment
+    volumes: *backend-volumes
+    command: ["python", "-m", "app.document_worker"]
 
   parser-service:
     build:

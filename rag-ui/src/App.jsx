@@ -3,9 +3,10 @@ import ReactMarkdown from "react-markdown";
 
 import {
   checkHealth,
+  createDocumentJob,
+  getDocumentJob,
   getDocuments,
   sendQuery,
-  uploadDocument,
 } from "./api";
 
 import "./App.css";
@@ -62,8 +63,10 @@ function App() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadMessage, setUploadMessage] = useState(null);
   const [uploadError, setUploadError] = useState(null);
-  const [uploadDetails, setUploadDetails] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [activeJobId, setActiveJobId] = useState(() =>
+    localStorage.getItem("rag_active_document_job")
+  );
 
   const [history, setHistory] = useState(() => {
     const savedHistory = localStorage.getItem("rag_query_history");
@@ -74,6 +77,55 @@ function App() {
     loadHealth();
     loadDocuments();
   }, []);
+
+  useEffect(() => {
+    if (!activeJobId) return;
+    const controller = new AbortController();
+    let timer;
+
+    function finishJob() {
+      localStorage.removeItem("rag_active_document_job");
+      setActiveJobId(null);
+    }
+
+    async function pollJob() {
+      try {
+        const job = await getDocumentJob(activeJobId, controller.signal);
+        if (controller.signal.aborted) return;
+        if (job.status === "completed") {
+          setUploadMessage(`${job.filename}: PDF обработан и импортирован в Neo4j.`);
+          finishJob();
+          await loadDocuments();
+          return;
+        }
+        if (job.status === "failed") {
+          setUploadMessage(null);
+          setUploadError(`${job.filename}: обработка завершилась ошибкой. Задание ${job.id}.`);
+          finishJob();
+          return;
+        }
+        setUploadMessage(
+          job.status === "running" ? `${job.filename}: обрабатывается.` : `${job.filename}: в очереди.`
+        );
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        if (error.status === 404) {
+          setUploadMessage(null);
+          setUploadError("Задание не найдено.");
+          finishJob();
+          return;
+        }
+        setUploadMessage("Не удалось проверить статус. Повторяем запрос…");
+      }
+      timer = setTimeout(pollJob, 1500);
+    }
+
+    pollJob();
+    return () => {
+      controller.abort();
+      clearTimeout(timer);
+    };
+  }, [activeJobId]);
 
   async function loadHealth() {
     setHealthStatus("checking");
@@ -202,36 +254,22 @@ function App() {
     if (!selectedFile) {
       setUploadError("Выберите PDF-файл перед загрузкой.");
       setUploadMessage(null);
-      setUploadDetails(null);
       return;
     }
 
     setIsUploading(true);
     setUploadError(null);
     setUploadMessage(null);
-    setUploadDetails(null);
 
     try {
-      const data = await uploadDocument(selectedFile);
-
-      const uploadLog =
-        typeof data === "string"
-          ? data
-          : data?.message || JSON.stringify(data, null, 2);
-
-      const isImported = uploadLog.includes("Import finished");
-
-      setUploadMessage(
-        isImported
-          ? "PDF загружен и импортирован в Neo4j."
-          : "PDF успешно отправлен на backend."
-      );
-      setUploadDetails(uploadLog);
+      const job = await createDocumentJob(selectedFile);
+      localStorage.setItem("rag_active_document_job", job.id);
+      setActiveJobId(job.id);
+      setUploadMessage(`${job.filename}: принят в очередь.`);
 
       setSelectedFile(null);
       event.target.reset();
 
-      await loadDocuments();
     } catch (requestError) {
       setUploadError(
         requestError.data?.detail ||
@@ -380,25 +418,17 @@ function App() {
                 setSelectedFile(event.target.files?.[0] || null);
                 setUploadError(null);
                 setUploadMessage(null);
-                setUploadDetails(null);
               }}
             />
 
-            <button type="submit" disabled={isUploading}>
+            <button type="submit" disabled={isUploading || Boolean(activeJobId)}>
               {isUploading ? "Загрузка..." : "Загрузить"}
             </button>
           </form>
 
           {uploadMessage && (
-            <div className="upload-result success">
+            <div className="upload-result success" role="status">
               <p>{uploadMessage}</p>
-
-              {uploadDetails && (
-                <details className="upload-details">
-                  <summary>Показать лог обработки</summary>
-                  <pre>{uploadDetails}</pre>
-                </details>
-              )}
             </div>
           )}
 
